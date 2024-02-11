@@ -4,7 +4,7 @@ The `wrap-log` extension enhances your debugging experience by automatically wra
 
 ## Known Issues
 
-Currently, there are no known issues with the `wrap-log` extension. If you encounter any problems, please open an issue on the [GitHub repository](https://github.com/yourusername/wrap-log/issues).
+Currently, there are no known issues with the `wrap-log` extension. If you encounter any problems, please open an issue on the [GitHub repository](https://github.com/ronnyalex/log-wrap/issues).
 
 ## Release Notes
 

@@ -6,6 +6,11 @@
   "engines": {
     "vscode": "^1.86.0"
   },
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/ronnyalex/log-wrap.git"
+  },
+  "publisher": "itsg00d",
   "categories": [
     "Other"
   ],
