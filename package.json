@@ -2,7 +2,7 @@
   "name": "log-wrap",
   "displayName": "log-wrap",
   "description": "wrapping string to log the output",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.86.0"
   },
