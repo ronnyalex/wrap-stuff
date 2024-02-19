@@ -31,7 +31,7 @@ function handle(type) {
 	new Promise((resolve, reject) => {
 		let languageId = currentEditor.document.languageId;
 
-		let funcName = languageId === 'php' ? 'var_dump' : 'console.log';
+		let funcName = languageId === 'php' ? 'dd' : 'console.log';
 	 	let sel = currentEditor.selection;
 		let len = sel.end.character - sel.start.character;
 
@@ -73,9 +73,6 @@ function handle(type) {
 			}
 			} else if (type === 'name') {
 				wrapData.txt = funcName + "('".concat(wrapData.item.replace(/['"]+/g, ''), "')", semicolon);
-			}
-			if (languageId === 'php') {
-				wrapData.txt += "\nexit;\n";
 			}
 			resolve(wrapData);
 	  }
