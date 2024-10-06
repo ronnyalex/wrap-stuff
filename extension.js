@@ -25,12 +25,8 @@ function activate(context) {
 }
 
 function handle(type) {
-
-
-
 	new Promise((resolve, reject) => {
 		let languageId = currentEditor.document.languageId;
-
 		let funcName = languageId === 'php' ? 'dump' : 'console.log';
 	 	let sel = currentEditor.selection;
 		let len = sel.end.character - sel.start.character;
@@ -62,15 +58,15 @@ function handle(type) {
 			};
 			const semicolon = ';';
 			if (type === 'nameValue') {
-			if (wrapData.item.includes(',')) {
-				const items = wrapData.item.split(',').map((item) => item.split(':')[0].split('?')[0].trim()).filter(i => i)
-				wrapData.txt = '';
-				for (const item of items) {
-					wrapData.txt += funcName + "('".concat(item.replace(/['"]+/g, ''), "', ", item, ')', semicolon) + "\n" + ind;
-				}
-			} else {
+			// if (wrapData.item.includes(',')) {
+			// 	const items = wrapData.item.split(',').map((item) => item.split(':')[0].split('?')[0].trim()).filter(i => i)
+			// 	wrapData.txt = '';
+			// 	for (const item of items) {
+			// 		wrapData.txt += funcName + "('".concat(item.replace(/['"]+/g, ''), "', ", item, ')', semicolon) + "\n" + ind;
+			// 	}
+			// } else {
 				wrapData.txt = funcName + "('".concat(wrapData.item.replace(/['"]+/g, ''), "', ", wrapData.item, ')', semicolon);
-			}
+			// }
 			} else if (type === 'name') {
 				wrapData.txt = funcName + "('".concat(wrapData.item.replace(/['"]+/g, ''), "')", semicolon);
 			}
