@@ -30,6 +30,7 @@
   },
   "scripts": {
     "lint": "eslint .",
+    "patch": "npm version patch",
     "pretest": "npm run lint",
     "test": "vscode-test"
   },
