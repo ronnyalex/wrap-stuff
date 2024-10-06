@@ -31,7 +31,7 @@ function handle(type) {
 	new Promise((resolve, reject) => {
 		let languageId = currentEditor.document.languageId;
 
-		let funcName = languageId === 'php' ? 'dd' : 'console.log';
+		let funcName = languageId === 'php' ? 'dump' : 'console.log';
 	 	let sel = currentEditor.selection;
 		let len = sel.end.character - sel.start.character;
 
