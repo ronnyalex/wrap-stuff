@@ -2,13 +2,13 @@
   "name": "log-wrap",
   "displayName": "log-wrap",
   "description": "wrapping string to log the output",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "engines": {
     "vscode": "^1.86.0"
   },
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/ronnyalex/log-wrap.git"
+    "type": "git",
+    "url": "https://github.com/ronnyalex/log-wrap.git"
   },
   "publisher": "itsg00d",
   "categories": [
@@ -26,7 +26,7 @@
         "command": "log.wrap.name",
         "title": "log wrap name"
       }
-  ]
+    ]
   },
   "scripts": {
     "lint": "eslint .",
