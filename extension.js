@@ -18,9 +18,19 @@ function activate(context) {
 	);
 	context.subscriptions.push(
 		vscode.commands.registerTextEditorCommand('log.wrap.name',()=>
-			handle( 'name')
+			handle('name')
 		)
-	  );
+	);
+	context.subscriptions.push(
+		vscode.commands.registerTextEditorCommand('template.literal.wrap',()=>
+			handle('literal')
+		)
+	);
+	context.subscriptions.push(
+		vscode.commands.registerTextEditorCommand('code.block.wrap',()=>
+			handle('codeblock')
+		)
+	);
 
 }
 
@@ -55,51 +65,83 @@ function handle(type) {
 			line: lineNumber,
 			sel: sel,
 			lastLine: doc.lineCount - 1 == lineNumber,
+			type: type
 			};
 			const semicolon = ';';
 			if (type === 'nameValue') {
-			// if (wrapData.item.includes(',')) {
-			// 	const items = wrapData.item.split(',').map((item) => item.split(':')[0].split('?')[0].trim()).filter(i => i)
-			// 	wrapData.txt = '';
-			// 	for (const item of items) {
-			// 		wrapData.txt += funcName + "('".concat(item.replace(/['"]+/g, ''), "', ", item, ')', semicolon) + "\n" + ind;
-			// 	}
-			// } else {
 				wrapData.txt = funcName + "('".concat(wrapData.item.replace(/['"]+/g, ''), "', ", wrapData.item, ')', semicolon);
-			// }
 			} else if (type === 'name') {
 				wrapData.txt = funcName + "('".concat(wrapData.item.replace(/['"]+/g, ''), "')", semicolon);
+			} else if (type === 'literal') {
+				// For literal type, we'll handle it in the then block
+				wrapData.txt = '`' + item + '`';
+			} else if (type === 'codeblock') {
+				// For code block, wrap with triple backticks and add new lines
+				wrapData.txt = '```\n' + item + '\n```';
 			}
 			resolve(wrapData);
 	  }
 	})
 	  .then((wrap) => {
-		let nxtLine
-		let nxtLineInd
+	    if (wrap.type === 'literal' || wrap.type === 'codeblock') {
+	      // For literal type and code block, replace the selection with wrapped text
+	      let startPos = wrap.ran.start;
+	      let finalText = wrap.txt;
 
-		if (!wrap.lastLine) {
-		  nxtLine = wrap.doc.lineAt(wrap.line + 1);
-		  nxtLineInd = nxtLine.text.substring(0, nxtLine.firstNonWhitespaceCharacterIndex);
-		} else {
-		  nxtLineInd = '';
-		}
-		currentEditor
-		  .edit((e) => {
-			e.insert(
-			  new vscode.Position(
-				wrap.line,
-				wrap.doc.lineAt(wrap.line).range.end.character
-			  ),
-			  '\n'.concat(nxtLineInd > wrap.ind ? nxtLineInd : wrap.ind, wrap.txt)
-			);
-		  })
-		  .then(() => {
-			currentEditor.selection = wrap.sel;
-		  });
+	      currentEditor.edit(editBuilder => {
+	        editBuilder.replace(wrap.ran, finalText);
+	      }).then(() => {
+	        // Using setTimeout to ensure the edit is fully applied
+	        setTimeout(() => {
+	          // Create a range from the start position to start + length of the wrapped text
+	          let startPosition = new vscode.Position(startPos.line, startPos.character);
+	          console.log('startPosition', startPosition);
+	          let endPosition = new vscode.Position(
+	            // For multiline text (like codeblocks with newlines), we need to calculate the end line
+	            startPos.line + (finalText.match(/\n/g) || []).length,
+	            // If we're on the last line, use the remaining text length after the last newline
+	            // otherwise for first line, use the full start position + text length
+	            finalText.includes('\n')
+	              ? finalText.substring(finalText.lastIndexOf('\n') + 1).length
+	              : startPos.character + finalText.length
+	          );
+	          console.log('endPosition', endPosition);
+
+	          // Set the selection to cover the entire wrapped text
+	          currentEditor.selection = new vscode.Selection(startPosition, endPosition);
+	          console.log('selection set', currentEditor.selection);
+	        }, 500);
+	      });
+	    } else {
+	      // For other types, add the log statement on a new line
+		  let nxtLine
+		  let nxtLineInd
+
+		  if (!wrap.lastLine) {
+		    nxtLine = wrap.doc.lineAt(wrap.line + 1);
+		    nxtLineInd = nxtLine.text.substring(0, nxtLine.firstNonWhitespaceCharacterIndex);
+		  } else {
+		    nxtLineInd = '';
+		  }
+		  currentEditor
+		    .edit((e) => {
+			  e.insert(
+			    new vscode.Position(
+				  wrap.line,
+				  wrap.doc.lineAt(wrap.line).range.end.character
+			    ),
+			    '\n'.concat(nxtLineInd > wrap.ind ? nxtLineInd : wrap.ind, wrap.txt)
+			  );
+		    })
+		    .then(() => {
+			  currentEditor.selection = wrap.sel;
+		    });
+	    }
 	  })
 	  .catch((message) => {
 	  });
   }
+
 
 
 // This method is called when your extension is deactivated

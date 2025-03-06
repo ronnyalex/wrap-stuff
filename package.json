@@ -1,8 +1,8 @@
 {
-  "name": "log-wrap",
-  "displayName": "log-wrap",
-  "description": "wrapping string to log the output",
-  "version": "0.0.4",
+  "name": "wrap-stuff",
+  "displayName": "wrap stuff",
+  "description": "wrapping string to log the output, wrap name and value. Wrap with template literals",
+  "version": "0.0.8",
   "engines": {
     "vscode": "^1.86.0"
   },
@@ -10,7 +10,7 @@
     "type": "git",
     "url": "https://github.com/ronnyalex/log-wrap.git"
   },
-  "publisher": "itsg00d",
+  "publisher": "1tsg00d",
   "categories": [
     "Other"
   ],
@@ -25,6 +25,14 @@
       {
         "command": "log.wrap.name",
         "title": "log wrap name"
+      },
+      {
+        "command": "template.literal.wrap",
+        "title": "Wrap with template literals"
+      },
+      {
+        "command": "code.block.wrap",
+        "title": "Wrap with code block"
       }
     ]
   },
