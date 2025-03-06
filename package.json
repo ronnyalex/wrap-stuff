@@ -2,13 +2,13 @@
   "name": "wrap-stuff",
   "displayName": "wrap stuff",
   "description": "wrapping string to log the output, wrap name and value. Wrap with template literals",
-  "version": "0.0.11",
+  "version": "0.0.13",
   "engines": {
     "vscode": "^1.86.0"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ronnyalex/log-wrap.git"
+    "url": "https://github.com/ronnyalex/wrap-stuff.git"
   },
   "publisher": "1tsg00d",
   "categories": [

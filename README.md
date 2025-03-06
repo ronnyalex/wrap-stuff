@@ -64,16 +64,20 @@ You can assign keyboard shortcuts to these commands by adding entries to your `k
 
 ## Known Issues
 
-Currently, there are no known issues with the `wrap-stuff` extension. If you encounter any problems, please open an issue on the [GitHub repository](https://github.com/ronnyalex/log-wrap/issues).
+Currently, there are no known issues with the `wrap-stuff` extension. If you encounter any problems, please open an issue on the [GitHub repository](https://github.com/ronnyalex/wrap-stuff/issues).
 
 ## Release Notes
 
-### 0.0.10
+### 0.0.13
+
+- Fix README.md link
+
+### 0.0.11
 
 - Added feature to create empty template literals when no text is selected
 - Added feature to create empty code blocks when no text is selected
 - Added feature to create empty console.log statements when no text is selected
 
-### 0.0.11
+### 0.0.10
 
 Initial release of `wrap-stuff`.
