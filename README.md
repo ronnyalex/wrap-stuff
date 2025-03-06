@@ -1,10 +1,66 @@
-# Wrap Log
+# Wrap Stuff
 
-The `wrap-stuff` extension enhances your debugging experience by automatically '
+The `wrap-stuff` extension enhances your development experience by providing convenient wrapping utilities:
 
-- wrapping your selected code in a `console.log` statement if you're working in JavaScript, or a `var_dump` statement if you're working in PHP. It also removes any quotes in the name of the selected variable. If no text is selected, it creates an empty log statement with the cursor positioned inside the quotes.
-- included is a template-literals wrap that wraps the \`selection\` with template-literals \`. If no text is selected, it inserts empty template literals and places your cursor between them.
-- included is a code-block wrap that wraps the \`\`\`selection\`\`\` with markdown code blocks. If no text is selected, it creates an empty code block and places your cursor inside it.
+- **Console.log Wrap**: Wraps selected code in a `console.log` statement (or `var_dump` in PHP), removing any quotes in the variable name
+- **Template Literal Wrap**: Wraps selected text with backticks for template literals
+- **Code Block Wrap**: Wraps selected text with markdown code block syntax
+
+When no text is selected, each wrap command creates an empty wrapper with cursor properly positioned inside.
+
+## Demonstrations
+
+### Console.log Wrap
+
+![Console.log Wrap Demo](images/log-wrap-demo.gif)
+
+### Template Literal Wrap
+
+![Template Literal Wrap Demo](images/template-literal-demo.gif)
+
+### Code Block Wrap
+
+![Code Block Wrap Demo](images/code-block-demo.gif)
+
+## Commands
+
+The extension provides the following commands (accessible via Command Palette - `Ctrl+Shift+P` or `Cmd+Shift+P`):
+
+| Command                       | Description                                 | When to Use                                                |
+| ----------------------------- | ------------------------------------------- | ---------------------------------------------------------- |
+| `Log wrap name and value`     | Creates `console.log('variable', variable)` | When you want to log both the name and value of a variable |
+| `log wrap name`               | Creates `console.log('variable')`           | When you just want to output a label                       |
+| `Wrap with template literals` | Wraps with `` `text` ``                     | For creating JavaScript template literals                  |
+| `Wrap with code block`        | Wraps with triple backticks                 | For creating Markdown code blocks                          |
+
+## Keyboard Shortcuts
+
+You can assign keyboard shortcuts to these commands by adding entries to your `keybindings.json`:
+
+```json
+[
+  {
+    "key": "alt+l",
+    "command": "log.wrap",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "alt+n",
+    "command": "log.wrap.name",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "alt+t",
+    "command": "template.literal.wrap",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "alt+c",
+    "command": "code.block.wrap",
+    "when": "editorTextFocus"
+  }
+]
+```
 
 ## Known Issues
 
