@@ -46,100 +46,149 @@ function handle(type) {
 			? currentEditor.document.getWordRangeAtPosition(sel.anchor)
 			: new vscode.Range(sel.start, sel.end);
 
-		if (ran == undefined) {
-			reject('NO_WORD');
-		} else {
-			let doc = currentEditor.document;
-			let lineNumber = ran.start.line;
-			let item = doc.getText(ran);
+		// Allow all types to proceed even without a selection/word
+		let doc = currentEditor.document;
+		let lineNumber = ran ? ran.start.line : sel.active.line;
+		let item = ran ? doc.getText(ran) : '';
+		let cursorPosition = sel.active;
 
-			let idx = doc.lineAt(lineNumber).firstNonWhitespaceCharacterIndex;
-			let ind = doc.lineAt(lineNumber).text.substring(0, idx);
-			let wrapData = {
+		let idx = doc.lineAt(lineNumber).firstNonWhitespaceCharacterIndex;
+		let ind = doc.lineAt(lineNumber).text.substring(0, idx);
+		let wrapData = {
 			txt: 'console.log',
 			item: item,
 			doc: doc,
-			ran: ran,
+			ran: ran || new vscode.Range(cursorPosition, cursorPosition), // Use cursor position if no range
 			idx: idx,
 			ind: ind,
 			line: lineNumber,
 			sel: sel,
+			cursorPosition: cursorPosition,
 			lastLine: doc.lineCount - 1 == lineNumber,
-			type: type
-			};
-			const semicolon = ';';
-			if (type === 'nameValue') {
+			type: type,
+			isEmpty: ran == undefined // Flag to indicate if we're dealing with an empty selection/no word
+		};
+		const semicolon = ';';
+
+		if (type === 'nameValue') {
+			if (wrapData.isEmpty) {
+				wrapData.txt = funcName + "('')" + semicolon; // Empty console.log
+				wrapData.emptyLogStatement = true;
+			} else {
 				wrapData.txt = funcName + "('".concat(wrapData.item.replace(/['"]+/g, ''), "', ", wrapData.item, ')', semicolon);
-			} else if (type === 'name') {
+			}
+		} else if (type === 'name') {
+			if (wrapData.isEmpty) {
+				wrapData.txt = funcName + "('')" + semicolon; // Empty console.log
+				wrapData.emptyLogStatement = true;
+			} else {
 				wrapData.txt = funcName + "('".concat(wrapData.item.replace(/['"]+/g, ''), "')", semicolon);
-			} else if (type === 'literal') {
-				// For literal type, we'll handle it in the then block
+			}
+		} else if (type === 'literal') {
+			// For literal type, check if we have a selection/word
+			if (wrapData.isEmpty) {
+				wrapData.txt = '``'; // Empty template literal
+			} else {
 				wrapData.txt = '`' + item + '`';
-			} else if (type === 'codeblock') {
-				// For code block, wrap with triple backticks and add new lines
+			}
+		} else if (type === 'codeblock') {
+			// For code block, wrap with triple backticks and add new lines
+			if (wrapData.isEmpty) {
+				wrapData.txt = '```\n\n```'; // Empty code block with a blank line between backticks
+			} else {
 				wrapData.txt = '```\n' + item + '\n```';
 			}
-			resolve(wrapData);
-	  }
+		}
+		resolve(wrapData);
 	})
-	  .then((wrap) => {
-	    if (wrap.type === 'literal' || wrap.type === 'codeblock') {
-	      // For literal type and code block, replace the selection with wrapped text
-	      let startPos = wrap.ran.start;
-	      let finalText = wrap.txt;
+	.then((wrap) => {
+		if (wrap.type === 'literal' || wrap.type === 'codeblock') {
+			// For literal type and code block, replace the selection with wrapped text
+			let startPos = wrap.ran.start;
+			let finalText = wrap.txt;
 
-	      currentEditor.edit(editBuilder => {
-	        editBuilder.replace(wrap.ran, finalText);
-	      }).then(() => {
-	        // Using setTimeout to ensure the edit is fully applied
-	        setTimeout(() => {
-	          // Create a range from the start position to start + length of the wrapped text
-	          let startPosition = new vscode.Position(startPos.line, startPos.character);
-	          console.log('startPosition', startPosition);
-	          let endPosition = new vscode.Position(
-	            // For multiline text (like codeblocks with newlines), we need to calculate the end line
-	            startPos.line + (finalText.match(/\n/g) || []).length,
-	            // If we're on the last line, use the remaining text length after the last newline
-	            // otherwise for first line, use the full start position + text length
-	            finalText.includes('\n')
-	              ? finalText.substring(finalText.lastIndexOf('\n') + 1).length
-	              : startPos.character + finalText.length
-	          );
-	          console.log('endPosition', endPosition);
+			currentEditor.edit(editBuilder => {
+				editBuilder.replace(wrap.ran, finalText);
+			}).then(() => {
+				// Using setTimeout to ensure the edit is fully applied
+				setTimeout(() => {
+					if (wrap.type === 'literal' && wrap.isEmpty) {
+						// For empty template literals, place cursor between the backticks
+						let cursorPos = new vscode.Position(startPos.line, startPos.character + 1);
+						currentEditor.selection = new vscode.Selection(cursorPos, cursorPos);
+					} else if (wrap.type === 'codeblock' && wrap.isEmpty) {
+						// For empty code blocks, place cursor on the blank line between backticks
+						let cursorPos = new vscode.Position(startPos.line + 1, 0);
+						currentEditor.selection = new vscode.Selection(cursorPos, cursorPos);
+					} else {
+						// Create a range from the start position to start + length of the wrapped text
+						let startPosition = new vscode.Position(startPos.line, startPos.character);
+						let endPosition = new vscode.Position(
+							// For multiline text (like codeblocks with newlines), we need to calculate the end line
+							startPos.line + (finalText.match(/\n/g) || []).length,
+							// If we're on the last line, use the remaining text length after the last newline
+							// otherwise for first line, use the full start position + text length
+							finalText.includes('\n')
+								? finalText.substring(finalText.lastIndexOf('\n') + 1).length
+								: startPos.character + finalText.length
+						);
 
-	          // Set the selection to cover the entire wrapped text
-	          currentEditor.selection = new vscode.Selection(startPosition, endPosition);
-	          console.log('selection set', currentEditor.selection);
-	        }, 500);
-	      });
-	    } else {
-	      // For other types, add the log statement on a new line
-		  let nxtLine
-		  let nxtLineInd
+						// Set the selection to cover the entire wrapped text
+						currentEditor.selection = new vscode.Selection(startPosition, endPosition);
+					}
+				}, 50);
+			});
+		} else {
+			// For log wrap types (nameValue and name)
+			if (wrap.isEmpty && wrap.emptyLogStatement) {
+				// For empty log statements, insert inline and position cursor inside quotes
+				let startPos = wrap.ran.start;
+				let finalText = wrap.txt;
 
-		  if (!wrap.lastLine) {
-		    nxtLine = wrap.doc.lineAt(wrap.line + 1);
-		    nxtLineInd = nxtLine.text.substring(0, nxtLine.firstNonWhitespaceCharacterIndex);
-		  } else {
-		    nxtLineInd = '';
-		  }
-		  currentEditor
-		    .edit((e) => {
-			  e.insert(
-			    new vscode.Position(
-				  wrap.line,
-				  wrap.doc.lineAt(wrap.line).range.end.character
-			    ),
-			    '\n'.concat(nxtLineInd > wrap.ind ? nxtLineInd : wrap.ind, wrap.txt)
-			  );
-		    })
-		    .then(() => {
-			  currentEditor.selection = wrap.sel;
-		    });
-	    }
-	  })
-	  .catch((message) => {
-	  });
+				currentEditor.edit(editBuilder => {
+					editBuilder.replace(wrap.ran, finalText);
+				}).then(() => {
+					// Using setTimeout to ensure the edit is fully applied
+					setTimeout(() => {
+						 // Find the position of the first single quote in the text
+						let firstQuotePos = finalText.indexOf("'");
+
+						// Position cursor between the quotes (after first quote)
+						let cursorPos = new vscode.Position(
+							startPos.line,
+							startPos.character + firstQuotePos + 1
+						);
+						currentEditor.selection = new vscode.Selection(cursorPos, cursorPos);
+					}, 50);
+				});
+			} else {
+				// For regular log statements with selection/word, add on a new line
+				let nxtLine
+				let nxtLineInd
+				if (!wrap.lastLine) {
+					nxtLine = wrap.doc.lineAt(wrap.line + 1);
+					nxtLineInd = nxtLine.text.substring(0, nxtLine.firstNonWhitespaceCharacterIndex);
+				} else {
+					nxtLineInd = '';
+				}
+				currentEditor
+					.edit((e) => {
+						e.insert(
+							new vscode.Position(
+								wrap.line,
+								wrap.doc.lineAt(wrap.line).range.end.character
+							),
+							'\n'.concat(nxtLineInd > wrap.ind ? nxtLineInd : wrap.ind, wrap.txt)
+						);
+					})
+					.then(() => {
+						currentEditor.selection = wrap.sel;
+					});
+			}
+		}
+	})
+	.catch((message) => {
+	});
   }
 
 
