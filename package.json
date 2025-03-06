@@ -2,7 +2,7 @@
   "name": "wrap-stuff",
   "displayName": "wrap stuff",
   "description": "wrapping string to log the output, wrap name and value. Wrap with template literals",
-  "version": "0.0.8",
+  "version": "0.0.10",
   "engines": {
     "vscode": "^1.86.0"
   },
