@@ -74,6 +74,6 @@ Currently, there are no known issues with the `wrap-stuff` extension. If you enc
 - Added feature to create empty code blocks when no text is selected
 - Added feature to create empty console.log statements when no text is selected
 
-### 0.0.9
+### 0.0.11
 
 Initial release of `wrap-stuff`.
