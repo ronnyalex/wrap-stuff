@@ -32,6 +32,73 @@ function activate(context) {
 		)
 	);
 
+	// Add new command for converting to template string
+	context.subscriptions.push(
+		vscode.commands.registerCommand('codeblock.convert.to.template.string', () => {
+			const editor = vscode.window.activeTextEditor;
+			if (!editor) {
+				vscode.window.showInformationMessage(
+					"Open a file to convert strings to template strings."
+				);
+				return;
+			}
+
+			const document = editor.document;
+			const selections = editor.selections;
+
+			editor.edit((editBuilder) => {
+				selections.forEach((selection) => {
+					const range = getEnclosingStringRange(document, selection.active);
+					if (range) {
+						const text = document.getText(range);
+						// Convert the string into a template string by replacing quotes with backticks.
+						const newText = text.replace(/^(['"])(.*)\1$/, "`$2`");
+						editBuilder.replace(range, newText);
+						vscode.window.showInformationMessage(
+							"Formatted to template string literal"
+						);
+					}
+				});
+			});
+		})
+	);
+}
+
+/**
+ * Get the range of the string that encloses the cursor position
+ * @param {vscode.TextDocument} document - The current document
+ * @param {vscode.Position} position - The current cursor position
+ * @returns {vscode.Range|null} - The range of the enclosing string, or null if not found
+ */
+function getEnclosingStringRange(document, position) {
+	const lineText = document.lineAt(position.line).text;
+	let startQuotePos = -1;
+	let endQuotePos = -1;
+	let quoteChar = '';
+
+	// Look backward from the cursor for the start quote
+	for (let i = position.character - 1; i >= 0; i--) {
+		if (lineText[i] === '"' || lineText[i] === "'") {
+			startQuotePos = i;
+			quoteChar = lineText[i];
+			break;
+		}
+	}
+
+	// Look forward from the cursor for the end quote of the same type
+	for (let i = position.character; i < lineText.length; i++) {
+		if (lineText[i] === quoteChar) {
+			endQuotePos = i;
+			break;
+		}
+	}
+
+	if (startQuotePos !== -1 && endQuotePos !== -1 && quoteChar) {
+		// Create a range that includes the quotes
+		return new vscode.Range(position.line, startQuotePos, position.line, endQuotePos + 1);
+	}
+
+	return null;
 }
 
 function handle(type) {

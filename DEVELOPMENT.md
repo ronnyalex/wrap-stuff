@@ -89,7 +89,3 @@ To debug the extension:
 3. In this window, you can test your extension and set breakpoints
 
 Remember to check the Developer Tools console (Help > Toggle Developer Tools) for any runtime errors.
-
-```
-
-```

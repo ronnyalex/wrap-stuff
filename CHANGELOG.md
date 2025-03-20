@@ -4,6 +4,12 @@ All notable changes to the "wrap-stuff" extension will be documented in this fil
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.0.14] - 2023-XX-XX
+
+### Added
+
+- New command: "Convert to template string" (`codeblock.convert.to.template.string`) that converts a standard string to a template literal by detecting the enclosing quotes at the cursor position
+
 ## [0.0.10] - 2023-11-XX
 
 ### Added
